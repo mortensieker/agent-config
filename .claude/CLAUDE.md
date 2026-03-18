@@ -33,3 +33,18 @@ Analyst → Architect → Developer(s) → Reviewer
 | `spec/REQUIREMENTS.md` | Analyst | Architect |
 | `spec/SPEC.md` | Architect | Developer(s), Reviewer |
 | `spec/COMMENTS.md` | Reviewer | Developer(s) |
+
+## Error Handling Rules
+
+These rules apply whenever you invoke a sub-agent via the Task tool.
+
+**If a Task tool call returns an internal error, an empty result, or `[Tool result missing due to internal error]`:**
+- Stop immediately. Do not retry silently.
+- Tell the user exactly which agent failed (e.g. "The Developer agent failed to start").
+- Report the error as-is so the user can see it.
+- Wait for the user to decide whether to retry or investigate.
+
+**Do not:**
+- Silently retry a failed agent call
+- Continue the workflow after an agent failure
+- Burn tokens attempting workarounds without telling the user first
