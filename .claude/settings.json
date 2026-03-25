@@ -1,0 +1,42 @@
+{
+	"$schema": "https://json.schemastore.org/claude-code-settings.json",
+	"env": {
+		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+	},
+	"permissions": {
+		"allow": [
+			"Bash(npm:*)",
+			"Bash(npx:*)",
+			"Bash(node:*)",
+			"Bash(go:*)",
+			"Bash(make:*)",
+			"Bash(ls:*)",
+			"Bash(cat:*)",
+			"Bash(echo:*)",
+			"Bash(mkdir:*)",
+			"Bash(cp:*)",
+			"Bash(mv:*)",
+			"Bash(which:*)",
+			"Bash(pwd:*)",
+			"Bash(find:*)",
+			"Bash(grep:*)",
+			"Bash(sed:*)",
+			"Bash(awk:*)",
+			"Bash(sort:*)",
+			"Bash(uniq:*)",
+			"Bash(wc:*)",
+			"Bash(curl:*)",
+			"WebSearch(*)",
+			"WebFetch(*)"
+		],
+		"deny": [
+			"Bash(rm -rf /)",
+			"Bash(rm -rf /*)",
+			"Bash(sudo:*)",
+			"Bash(git add:*)",
+			"Bash(git commit:*)",
+			"Bash(git push:*)",
+			"Read(**/secrets/**)"
+		]
+	}
+}

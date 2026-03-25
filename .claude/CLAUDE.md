@@ -7,11 +7,11 @@ This repository provides a set of reusable Claude Code sub-agents for structured
 | Agent | Role |
 |---|---|
 | [Analyst](agents/analyst.md) | Elicits and structures requirements into `spec/REQUIREMENTS.md` |
-| [Architect](agents/architect.md) | Designs the solution and produces `spec/SPEC.md` |
-| [Developer](agents/developer.md) | Implements code based on `spec/SPEC.md` using TDD |
-| [Go Developer](agents/go-developer.md) | Go-specific implementation |
-| [Svelte Developer](agents/svelte-developer.md) | Svelte/SvelteKit-specific implementation |
-| [Reviewer](agents/reviewer.md) | Reviews code against `spec/SPEC.md` and produces `spec/COMMENTS.md` |
+| [Architect](agents/architect.md) | Designs the solution and produces `spec/SPEC.md` or `spec/SPEC-<NAME>.md` files |
+| [Developer](agents/developer.md) | Implements code based on one or more spec files using TDD |
+| [Go Developer](agents/developer-go.md) | Go-specific implementation |
+| [Svelte Developer](agents/developer-sveltekit.md) | Svelte/SvelteKit-specific implementation |
+| [Reviewer](agents/reviewer.md) | Reviews code against one or more spec files and produces `spec/COMMENTS-<repo-name>.md` |
 
 ## Workflow
 
@@ -22,17 +22,26 @@ Analyst → Architect → Developer(s) → Reviewer
 ```
 
 1. **Analyst** — Engages with the user to elicit and validate requirements. Produces `spec/REQUIREMENTS.md`.
-2. **Architect** — Reads `spec/REQUIREMENTS.md`, designs the solution architecture, produces `spec/SPEC.md`.
-3. **Developer / Go Developer / Svelte Developer** — Reads `spec/SPEC.md`, implements the solution incrementally using TDD.
-4. **Reviewer** — Reviews the implemented codebase against `spec/SPEC.md`. Produces `spec/COMMENTS.md`.
+2. **Architect** — Reads `spec/REQUIREMENTS.md`, designs the solution architecture, produces `spec/SPEC.md`. For multi-component projects, produces separate `spec/SPEC-<NAME>.md` files (e.g. `spec/SPEC-API.md`, `spec/SPEC-CLIENT.md`).
+3. **Developer / Go Developer / Svelte Developer** — Scans for spec files, asks which to use if multiple exist, then implements incrementally using TDD.
+4. **Reviewer** — Scans for spec files, asks which to use if multiple exist, then reviews the codebase and produces `spec/COMMENTS-<repo-name>.md`.
 
 ## Artifacts
 
 | File | Produced by | Consumed by |
 |---|---|---|
 | `spec/REQUIREMENTS.md` | Analyst | Architect |
-| `spec/SPEC.md` | Architect | Developer(s), Reviewer |
-| `spec/COMMENTS.md` | Reviewer | Developer(s) |
+| `spec/SPEC.md` or `spec/SPEC-<NAME>.md` | Architect | Developer(s), Reviewer |
+| `spec/COMMENTS-<repo-name>.md` | Reviewer | Developer(s) |
+
+### Multiple Spec Files
+
+When a project covers more than one distinct component (e.g. a client and an API), the Architect produces separate spec files named `spec/SPEC-<NAME>.md` rather than a single `spec/SPEC.md`.
+
+Agents that consume a spec (Developer variants, Reviewer) MUST scan the `spec/` directory at startup:
+- If exactly one spec file is found, use it automatically.
+- If multiple spec files are found, list them and ask the user which to use, or whether to work across all of them.
+- Never silently assume `spec/SPEC.md` is the only file.
 
 ## Error Handling Rules
 
