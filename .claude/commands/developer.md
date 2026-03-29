@@ -1,6 +1,9 @@
 Use the **Developer** sub-agent to implement the solution.
 
-The agent will scan `spec/` for all `SPEC*.md` files, confirm which to implement, then implement the solution using TDD.
+The agent will:
+1. Detect the technology from the spec and load the appropriate skill(s) from `~/.claude/skills/`
+2. Scan `spec/` for all `SPEC*.md` files and confirm which to implement
+3. Implement the solution using TDD, following the loaded skill's standards
 
 **Pre-check:** Scan `spec/` for any `SPEC*.md` files before starting. If none exist, tell the user to run `/architect` first. If multiple are found, list them and ask the user which to use.
 

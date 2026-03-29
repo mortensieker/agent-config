@@ -8,23 +8,39 @@ This repository provides a set of reusable Claude Code sub-agents for structured
 |---|---|
 | [Analyst](agents/analyst.md) | Elicits and structures requirements into `spec/REQUIREMENTS.md` |
 | [Architect](agents/architect.md) | Designs the solution and produces `spec/SPEC.md` or `spec/SPEC-<NAME>.md` files |
-| [Developer](agents/developer.md) | Implements code based on one or more spec files using TDD |
-| [Go Developer](agents/developer-go.md) | Go-specific implementation |
-| [Svelte Developer](agents/developer-sveltekit.md) | Svelte/SvelteKit-specific implementation |
-| [Reviewer](agents/reviewer.md) | Reviews code against one or more spec files and produces `spec/COMMENTS-<repo-name>.md` |
+| [Developer](agents/developer.md) | Implements code based on one or more spec files using TDD; auto-loads the appropriate technology skill |
+| [Reviewer](agents/reviewer.md) | Reviews code against one or more spec files and produces `spec/COMMENTS.md` |
+
+## Skills
+
+Technology standards are defined as composable skills in `skills/`. The Developer agent detects the stack from the spec and loads the relevant skill(s) automatically.
+
+| Skill | Purpose |
+|---|---|
+| `go` | Bundles all core Go skills (project structure, error handling, concurrency, testing) |
+| `go-project-structure` | Go directory layout, modules, interfaces, logging, config |
+| `go-error-handling` | Error wrapping, sentinel errors, custom error types |
+| `go-concurrency` | Goroutines, channels, context propagation |
+| `go-testing` | Table-driven tests, testify, mocking, TDD workflow |
+| `go-echo` | Go Echo REST API — extends all Go skills with Echo-specific conventions |
+| `sveltekit` | Bundles all core SvelteKit skills |
+| `sveltekit-project-structure` | Routing conventions, file layout, TypeScript setup |
+| `sveltekit-state` | Svelte 5 runes, load functions, shared state, data fetching |
+| `sveltekit-forms` | Form actions, validation, progressive enhancement |
+| `sveltekit-testing` | Vitest, Testing Library, Playwright, TDD workflow |
 
 ## Workflow
 
 The agents are designed to be used in sequence:
 
 ```
-Analyst → Architect → Developer(s) → Reviewer
+Analyst → Architect → Developer → Reviewer
 ```
 
 1. **Analyst** — Engages with the user to elicit and validate requirements. Produces `spec/REQUIREMENTS.md`.
 2. **Architect** — Reads `spec/REQUIREMENTS.md`, designs the solution architecture, produces `spec/SPEC.md`. For multi-component projects, produces separate `spec/SPEC-<NAME>.md` files (e.g. `spec/SPEC-API.md`, `spec/SPEC-CLIENT.md`).
-3. **Developer / Go Developer / Svelte Developer** — Scans for spec files, asks which to use if multiple exist, then implements incrementally using TDD.
-4. **Reviewer** — Scans for spec files, asks which to use if multiple exist, then reviews the codebase and produces `spec/COMMENTS-<repo-name>.md`.
+3. **Developer** — Detects technology from the spec, loads the matching skill(s), scans for spec files, asks which to use if multiple exist, then implements incrementally using TDD.
+4. **Reviewer** — Scans for spec files, asks which to use if multiple exist, then reviews the codebase and produces `spec/COMMENTS.md`.
 
 ## Artifacts
 
@@ -32,7 +48,7 @@ Analyst → Architect → Developer(s) → Reviewer
 |---|---|---|
 | `spec/REQUIREMENTS.md` | Analyst | Architect |
 | `spec/SPEC.md` or `spec/SPEC-<NAME>.md` | Architect | Developer(s), Reviewer |
-| `spec/COMMENTS-<repo-name>.md` | Reviewer | Developer(s) |
+| `spec/COMMENTS.md` | Reviewer | Developer(s) |
 
 ### Multiple Spec Files
 

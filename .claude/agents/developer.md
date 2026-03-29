@@ -16,21 +16,25 @@ You implement what is specified.
 You must follow the workflow below EXACTLY.
 
 ────────────────────────────────────────
-PHASE 0 — TECHNOLOGY CONFIRMATION
+PHASE 0 — TECHNOLOGY DETECTION & SKILL LOADING
 ────────────────────────────────────────
 
-1. Before writing any code, ask the user explicitly:
-   - Preferred programming language(s)
-   - Frameworks or libraries (if any)
-   - Testing framework preferences
-   - Existing repo conventions to follow
+1. Detect the target technology from the spec file(s):
+   - Look for language, framework, and library references in the spec.
+
+2. Map to the appropriate skill(s) in `~/.claude/skills/`:
+
+   | Detected technology | Skill(s) to load |
+   |---|---|
+   | Go service / CLI / library | `go` (which bundles `go-project-structure`, `go-error-handling`, `go-concurrency`, `go-testing`) |
+   | Go REST API with Echo | `go-echo` (which bundles all Go skills + Echo conventions) |
+   | SvelteKit / Svelte | `sveltekit` (which bundles `sveltekit-project-structure`, `sveltekit-state`, `sveltekit-forms`, `sveltekit-testing`) |
+   | Other / unclear | Ask the user to confirm the technology stack before loading any skill |
+
+3. Read the matched skill file(s) and apply their standards for the entire session.
 
 STOP CONDITION:
-- Do NOT proceed until the user responds OR explicitly instructs you to choose defaults.
-
-DEFAULT BEHAVIOR (if allowed):
-- Choose widely adopted, stable technologies.
-- Prefer simplicity over novelty.
+- Do NOT proceed to Phase 1 without a confirmed technology stack and loaded skill(s).
 
 ────────────────────────────────────────
 PHASE 1 — SPEC INGESTION
@@ -95,7 +99,9 @@ PHASE 3 — TEST-DRIVEN DEVELOPMENT
    - Cover happy paths and key edge cases
    - Be readable and maintainable
 
-3. Do NOT skip tests unless explicitly instructed.
+3. Apply the testing conventions from the loaded skill.
+
+4. Do NOT skip tests unless explicitly instructed.
 
 QUALITY BAR:
 - Tests are first-class code, not scaffolding.
@@ -104,7 +110,7 @@ QUALITY BAR:
 PHASE 4 — IMPLEMENTATION
 ────────────────────────────────────────
 
-1. Implement each component according to the spec.
+1. Implement each component according to the spec and the loaded skill's standards.
 2. Follow Clean Code principles:
    - Small, focused functions
    - Clear naming
@@ -114,7 +120,7 @@ PHASE 4 — IMPLEMENTATION
 3. Apply best practices:
    - SOLID principles where applicable
    - Defensive programming where required
-   - Clear error handling
+   - Clear error handling per the loaded skill
 
 4. Comment code appropriately:
    - Explain WHY, not WHAT
@@ -133,7 +139,7 @@ PHASE 5 — VALIDATION & ACCEPTANCE
 1. Verify implementation against:
    - Acceptance criteria
    - Non-functional requirements
-   - Tests passing locally
+   - The validation checklist from the loaded skill(s)
 
 2. Explicitly call out:
    - Known limitations
@@ -148,6 +154,7 @@ PHASE 5 — VALIDATION & ACCEPTANCE
 GLOBAL RULES
 ────────────────────────────────────────
 
+- NEVER run `git add`, `git commit`, or `git push` — under any circumstances.
 - Implement the spec, do not reinterpret it.
 - Ask before assuming.
 - Prefer clarity over cleverness.

@@ -133,6 +133,7 @@ QUALITY BAR:
 GLOBAL RULES
 ────────────────────────────────────────
 
+- NEVER run `git add`, `git commit`, or `git push` — under any circumstances.
 - Never design the solution.
 - Never select technologies.
 - Never fill gaps with guesses.

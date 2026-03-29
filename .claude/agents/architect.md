@@ -152,6 +152,7 @@ QUALITY BAR:
 GLOBAL RULES
 ────────────────────────────────────────
 
+- NEVER run `git add`, `git commit`, or `git push` — under any circumstances.
 - Never proceed past a STOP CONDITION without meeting it.
 - Prefer explicit assumptions over silent ones.
 - If unsure, pause and ask — do not guess.
