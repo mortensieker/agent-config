@@ -14,8 +14,6 @@ Look for the following files in the project root to determine the package manage
 | `go.mod` | Go modules |
 | `requirements.txt` / `pyproject.toml` / `Pipfile` | Python pip / pipenv / poetry |
 | `Gemfile` | Ruby bundler |
-| `Cargo.toml` | Rust cargo |
-| `composer.json` | PHP composer |
 
 If no recognised package manager files are found, tell the user and stop.
 
@@ -31,14 +29,14 @@ Run the appropriate outdated-check command for each detected package manager:
 - **pip**: `pip list --outdated --format json`
 - **poetry**: `poetry show --outdated`
 - **bundler**: `bundle outdated`
-- **cargo**: `cargo outdated -R`
-- **composer**: `composer outdated`
 
 ### 3. Filter to major and minor updates only
 
 From the output, identify packages where the available version differs in the **major** or **minor** segment from the currently installed version. Ignore patch-only updates.
 
-If no major or minor updates are found, report this to the user and stop — no branch or changes are needed.
+**Only update direct dependencies** — do not update indirect or transitive dependencies. A direct dependency is one explicitly declared in the project's manifest file (`package.json`, `go.mod`, `pyproject.toml`, `Gemfile`, etc.). Skip any package that is only present as a transitive dependency of another package.
+
+If no major or minor updates are found among direct dependencies, report this to the user and stop — no branch or changes are needed.
 
 ### 4. Summarise and confirm
 
@@ -66,7 +64,7 @@ git checkout -b deps/update-YYYY-MM-DD
 
 ### 6. Apply the updates
 
-Update only the packages identified in step 3. Use the least-invasive update command for the package manager:
+Update only the direct dependencies identified in step 3. Use the least-invasive update command for the package manager — target each package explicitly by name so transitive dependencies are not inadvertently upgraded:
 
 - **npm**: `npm install <pkg>@latest` for each package (or `npm update` if all are being updated)
 - **yarn**: `yarn upgrade <pkg>@latest`
@@ -75,8 +73,6 @@ Update only the packages identified in step 3. Use the least-invasive update com
 - **pip**: `pip install --upgrade <pkg>` for each
 - **poetry**: `poetry add <pkg>@latest`
 - **bundler**: `bundle update <gem>`
-- **cargo**: update version in `Cargo.toml`, then `cargo update`
-- **composer**: `composer require <pkg>:^<new-major>`
 
 ### 7. Run the test suite
 
@@ -86,8 +82,6 @@ Detect and run the project's tests:
 - **Go**: `go test ./...`
 - **Python**: try `pytest`, then `python -m pytest`, then `python -m unittest discover`
 - **Ruby**: `bundle exec rspec` or `bundle exec rake test`
-- **Rust**: `cargo test`
-- **PHP**: `./vendor/bin/phpunit`
 
 If no test command can be determined, warn the user and skip this step.
 
