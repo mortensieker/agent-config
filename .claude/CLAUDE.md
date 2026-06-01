@@ -1,15 +1,23 @@
 # Agent Setup
 
-This repository provides a set of reusable Claude Code sub-agents for structured software development workflows.
+This repository provides reusable Claude Code sub-agents for structured software development workflows.
 
 ## Agents
 
 | Agent | Role |
 |---|---|
-| [Analyst](agents/analyst.md) | Elicits and structures requirements into `spec/REQUIREMENTS.md` |
-| [Architect](agents/architect.md) | Designs the solution and produces `spec/SPEC.md` or `spec/SPEC-<NAME>.md` files |
-| [Developer](agents/developer.md) | Implements code based on one or more spec files using TDD; auto-loads the appropriate technology skill |
-| [Reviewer](agents/reviewer.md) | Reviews code against one or more spec files and produces `spec/COMMENTS.md` |
+| [Analyst](agents/analyst.md) | Elicits requirements and produces `spec/REQUIREMENTS.md` |
+| [Architect](agents/architect.md) | Designs the solution and produces `spec/SPEC.md` or `spec/SPEC-<NAME>.md` |
+| [Developer](agents/developer.md) | Implements code based on spec files using TDD |
+| [Reviewer](agents/reviewer.md) | Reviews the codebase against spec files and produces `spec/COMMENTS.md` |
+
+## Built-in Skills (complement the agents)
+
+| Skill | When to use |
+|---|---|
+| `/code-review` | Review the current diff for bugs and quality issues |
+| `/security-review` | Deep security scan of pending changes |
+| `/fix-comment` | Apply a specific finding from `spec/COMMENTS.md` |
 
 ## Skills
 
@@ -17,30 +25,28 @@ Technology standards are defined as composable skills in `skills/`. The Develope
 
 | Skill | Purpose |
 |---|---|
-| `go` | Bundles all core Go skills (project structure, error handling, concurrency, testing) |
-| `go-project-structure` | Go directory layout, modules, interfaces, logging, config |
+| `go` | Bundles all core Go skills |
+| `go-project-structure` | Directory layout, modules, interfaces, logging, config |
 | `go-error-handling` | Error wrapping, sentinel errors, custom error types |
 | `go-concurrency` | Goroutines, channels, context propagation |
 | `go-testing` | Table-driven tests, testify, mocking, TDD workflow |
-| `go-echo` | Go Echo REST API — extends all Go skills with Echo-specific conventions |
+| `go-echo` | Go Echo REST API — extends Go skills with Echo conventions |
 | `sveltekit` | Bundles all core SvelteKit skills |
 | `sveltekit-project-structure` | Routing conventions, file layout, TypeScript setup |
-| `sveltekit-state` | Svelte 5 runes, load functions, shared state, data fetching |
+| `sveltekit-state` | Svelte 5 runes, load functions, shared state |
 | `sveltekit-forms` | Form actions, validation, progressive enhancement |
 | `sveltekit-testing` | Vitest, Testing Library, Playwright, TDD workflow |
 
 ## Workflow
 
-The agents are designed to be used in sequence:
-
 ```
 Analyst → Architect → Developer → Reviewer
 ```
 
-1. **Analyst** — Engages with the user to elicit and validate requirements. Produces `spec/REQUIREMENTS.md`.
-2. **Architect** — Reads `spec/REQUIREMENTS.md`, designs the solution architecture, produces `spec/SPEC.md`. For multi-component projects, produces separate `spec/SPEC-<NAME>.md` files (e.g. `spec/SPEC-API.md`, `spec/SPEC-CLIENT.md`).
-3. **Developer** — Detects technology from the spec, loads the matching skill(s), scans for spec files, asks which to use if multiple exist, then implements incrementally using TDD.
-4. **Reviewer** — Scans for spec files, asks which to use if multiple exist, then reviews the codebase and produces `spec/COMMENTS.md`.
+1. **Analyst** — Elicits requirements, produces `spec/REQUIREMENTS.md`
+2. **Architect** — Reads requirements, designs solution, produces `spec/SPEC*.md`
+3. **Developer** — Loads matching skill(s), implements incrementally using TDD
+4. **Reviewer** — Reviews against spec, produces `spec/COMMENTS.md`; use `/security-review` and `/code-review` for deeper scans
 
 ## Artifacts
 
@@ -48,28 +54,12 @@ Analyst → Architect → Developer → Reviewer
 |---|---|---|
 | `spec/REQUIREMENTS.md` | Analyst | Architect |
 | `spec/SPEC.md` or `spec/SPEC-<NAME>.md` | Architect | Developer(s), Reviewer |
-| `spec/COMMENTS.md` | Reviewer | Developer(s) |
+| `spec/COMMENTS.md` | Reviewer | Developer(s) via `/fix-comment` |
 
 ### Multiple Spec Files
 
-When a project covers more than one distinct component (e.g. a client and an API), the Architect produces separate spec files named `spec/SPEC-<NAME>.md` rather than a single `spec/SPEC.md`.
+When a project covers more than one component, the Architect produces `spec/SPEC-<NAME>.md` per component. Agents that consume specs MUST scan `spec/` at startup — never assume `spec/SPEC.md` is the only file.
 
-Agents that consume a spec (Developer variants, Reviewer) MUST scan the `spec/` directory at startup:
-- If exactly one spec file is found, use it automatically.
-- If multiple spec files are found, list them and ask the user which to use, or whether to work across all of them.
-- Never silently assume `spec/SPEC.md` is the only file.
+## Error Handling
 
-## Error Handling Rules
-
-These rules apply whenever you invoke a sub-agent via the Task tool.
-
-**If a Task tool call returns an internal error, an empty result, or `[Tool result missing due to internal error]`:**
-- Stop immediately. Do not retry silently.
-- Tell the user exactly which agent failed (e.g. "The Developer agent failed to start").
-- Report the error as-is so the user can see it.
-- Wait for the user to decide whether to retry or investigate.
-
-**Do not:**
-- Silently retry a failed agent call
-- Continue the workflow after an agent failure
-- Burn tokens attempting workarounds without telling the user first
+If a sub-agent call returns an error or empty result: stop, tell the user which agent failed, report the error as-is, and wait for instructions. Do not retry silently.

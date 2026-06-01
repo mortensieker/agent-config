@@ -4,15 +4,10 @@ description: SvelteKit project layout and file conventions. Use when setting up 
 user-invocable: false
 ---
 
-## LANGUAGE & RUNTIME
+## LANGUAGE & FRAMEWORK
 
 - TypeScript (strict mode) throughout — no plain `.js` files
-- Node.js runtime unless the spec states otherwise
-
-## FRAMEWORK
-
-- SvelteKit (latest stable) with Svelte 5 runes (`$state`, `$derived`, `$effect`)
-- Do NOT use legacy Svelte 4 store patterns unless the existing codebase requires it
+- SvelteKit (latest stable) with Svelte 5 runes — do NOT use Svelte 4 store patterns in new code
 - File-based routing via `src/routes/`
 
 ## ROUTING FILE CONVENTIONS
@@ -20,55 +15,35 @@ user-invocable: false
 | File | Purpose |
 |---|---|
 | `+page.svelte` | Page UI component |
-| `+page.ts` | Universal load function (runs on server and client) |
-| `+page.server.ts` | Server-only load function and form actions |
-| `+layout.svelte` | Layout UI component |
-| `+layout.ts` / `+layout.server.ts` | Layout load equivalents |
-| `+server.ts` | API route handlers (GET, POST, etc.) |
+| `+page.ts` | Universal load function (server + client) |
+| `+page.server.ts` | Server-only load and form actions |
+| `+layout.svelte` | Layout UI |
+| `+server.ts` | API route handlers |
 | `+error.svelte` | Error boundary for the route segment |
 
-Prefer `+page.server.ts` for any data that must not be exposed client-side.
-
-## PATH ALIASES
-
-- Use `$lib` for all shared utilities, components, stores, and types (`src/lib/`)
-- Never use relative `../../` imports when `$lib` is applicable
-- Define additional aliases in `svelte.config.js` if the project warrants it
+Prefer `+page.server.ts` for data that must not be exposed client-side.
 
 ## DIRECTORY LAYOUT
 
 ```
 src/
-  routes/             — file-based routes
+  routes/           — file-based routes
   lib/
-    components/       — reusable Svelte components
-    stores/           — shared reactive state (if needed across routes)
-    utils/            — pure utility functions
-    types/            — TypeScript type definitions and interfaces
-  app.html            — HTML shell
-  hooks.server.ts     — server-side hooks (auth, session, logging)
-static/               — static assets served as-is
+    components/     — reusable Svelte components
+    stores/         — shared state (cross-route only)
+    utils/          — pure utility functions
+    types/          — TypeScript interfaces
+  hooks.server.ts   — auth, session, logging
+static/             — static assets
 ```
 
-## ADAPTER
+## PATH ALIASES
 
-- Default to `@sveltejs/adapter-auto`
-- Switch to `adapter-node` if the spec requires self-hosted deployment
-
-## STYLING
-
-- Tailwind CSS unless the spec specifies otherwise
-- Component-scoped `<style>` blocks for component-specific overrides only
-- Do NOT use global CSS for component styling
+- Use `$lib` for all shared code — never `../../` when `$lib` applies
 
 ## IMPLEMENTATION STYLE
 
-- Keep `+page.svelte` files thin — push logic into `$lib/`
-- Use typed `PageData` and `ActionData` from `$types` on every page
+- Keep `+page.svelte` thin — push logic into `$lib/`
+- Use typed `PageData` / `ActionData` from `$types` on every page
 - Validate and sanitize all server-side inputs
-- Protect server routes with auth checks in `hooks.server.ts` or load functions
-
-## BUILD CHECKLIST
-
-- `npx tsc --noEmit` — TypeScript compiles cleanly
-- `npx svelte-check` — no Svelte type errors
+- Default adapter: `@sveltejs/adapter-auto`; switch to `adapter-node` for self-hosted
