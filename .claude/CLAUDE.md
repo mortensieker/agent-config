@@ -2,6 +2,25 @@
 
 This repository provides reusable Claude Code sub-agents for structured software development workflows.
 
+## Working Directory
+
+  The shell's working directory already persists between Bash calls and is already the project root. Treat it as the root for all file operations, searches, and tool calls — use relative paths from it (e.g. `find . ...`, `grep -r ... .`).
+
+  Do NOT prefix commands with `cd "$(pwd)" &&`, `cd <path> &&`, or any `cd` into the root. It is redundant (the directory already persists) and it breaks permission allowlist matching: rules like `Bash(grep:*)` match the command *prefix*, so a compound command starting with `cd` never matches and forces a manual approval prompt. Run the bare command directly: `grep -rln ...`, not `cd "$(pwd)" && grep -rln ...`. Use `&&` only when the steps are genuinely dependent.
+
+  For paths: NEVER use `/`, `/Users/...`, `~`, or any absolute path that wasn't explicitly provided by the user (except where the file tools require absolute paths — see below).
+
+## Absolute Paths for File Tools
+
+  The `Read`, `Edit`, and `Write` tools require absolute paths. ALWAYS derive them by running `pwd` first and constructing the path from that
+  result.
+
+  NEVER construct absolute paths from memory, inference, or any knowledge of the user's filesystem (e.g. username, home directory, project
+  name).
+
+  ✅ Correct: run `pwd` → get `/some/path` → use `/some/path/spec/SPEC.md`
+  ❌ Wrong: infer `/Users/<username>/projects/<name>/spec/SPEC.md` from context
+
 ## Agents
 
 | Agent | Role |
@@ -59,6 +78,15 @@ Analyst → Architect → Developer → Reviewer
 ### Multiple Spec Files
 
 When a project covers more than one component, the Architect produces `spec/SPEC-<NAME>.md` per component. Agents that consume specs MUST scan `spec/` at startup — never assume `spec/SPEC.md` is the only file.
+
+## Database Migrations (Drizzle ORM)
+
+**NEVER write migration SQL files by hand.** Always use `npx drizzle-kit generate` to produce migrations from the schema. Hand-written SQL files break the Drizzle journal/snapshot system and the migration will never run.
+
+The correct workflow:
+1. Edit `src/lib/server/db/schema.ts`
+2. Run `npx drizzle-kit generate` — let it create the `.sql` file, update `drizzle/meta/_journal.json`, and create the snapshot
+3. Run `npx drizzle-kit migrate` (or the project's migrate command) to apply it
 
 ## Error Handling
 
